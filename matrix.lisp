@@ -99,32 +99,6 @@
       (reduce #'msub (cons mat mats))))
 
 
-;; (defun + (mat &rest mats)
-;;   (let* ((dims (array-dimensions mat))
-;;          (rows (first dims))
-;;          (cols (second dims))
-;;          (result (matrix rows cols)))
-;;     (loop for i from 0 below rows
-;;        do (loop for j from 0 below cols
-;;              do (setf (aref result i j)
-;;                       (apply 'cl-user::+
-;;                              (mapcar #'(lambda (arr) (aref arr i j)) (cons mat mats))))))
-;;     result))
-
-
-;; (defun - (mat &rest mats)
-;;   (let* ((dims (array-dimensions mat))
-;;          (rows (first dims))
-;;          (cols (second dims))
-;;          (result (matrix rows cols)))
-;;     (loop for i from 0 below rows
-;;        do (loop for j from 0 below cols
-;;              do (setf (aref result i j)
-;;                       (apply 'cl-user::-
-;;                              (mapcar #'(lambda (arr) (aref arr i j)) (cons mat mats))))))
-;;     result))
-
-
 ;; 矩阵乘法运算
 (defun mmul (mat1 mat2)
   (let* ((dims1 (array-dimensions mat1))
@@ -308,13 +282,6 @@
                       (row-addf tmat i j (- (/ (aref tmat i pos) (aref tmat j pos)))))))))
     tmat))
 
-    ;; (loop for j from (1- rows) downto 1
-    ;;    do (loop for i from (1- j) downto 0
-    ;;          do (let ((pos (count-prefix-zeros tmat j)))
-    ;;               (when (/= pos cols)
-    ;;                 (when (/= (aref tmat i pos) 0)
-    ;;                   (row-addf tmat i j (- (/ (aref tmat i pos) (aref tmat j pos)))))))))
-    ;; tmat))
 
 ;; 化为列最简矩阵
 (defun col-canonical (mat)
@@ -383,15 +350,6 @@
     result))
 
 
-;; (defun perm (vec k len)
-;;   (if (= k len)
-;;       (format t "~A~%" vec)
-;;       (loop for i from k below len
-;;          do (progn (rotatef (aref vec i) (aref vec k))
-;;                    (perm vec (1+ k) len)
-;;                    (rotatef (aref vec k) (aref vec i))))))
-  
-
 (defun gen-seq-vec (n)
   (make-array n :initial-contents (loop for i from 0 below n collect i)))
 
@@ -410,7 +368,6 @@
           (setf mul (* mul (aref mat i (svref perm i)))))
         (incf acc (* mul (expt -1 (inversion perm))))))
     acc)))
-
 
 
 (defun submatrix (mat i j)
