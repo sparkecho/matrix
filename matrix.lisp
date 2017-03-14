@@ -5,6 +5,7 @@
 ;;; "matrix" goes here. Hacks and glory await!
 
 ;; 矩阵构造函数
+;; Constructor function of matrix
 (defun matrix (rows cols &optional initvec)
   (let ((mat (make-array (list rows cols) :initial-element 0)))
     (if initvec
@@ -15,6 +16,7 @@
     mat))
 
 ;; 单位矩阵构造函数
+;; Build a `n order' eye matrix (identity matrix)
 (defun eye (n)
   (let ((mat (matrix n n)))
     (loop for i from 0 below n
@@ -24,6 +26,7 @@
                     (setf (aref mat i j) 0))))
     mat))
 
+;; Build a new matrix with the same content of mat
 (defun copy-matrix (mat)
   (let* ((dims (array-dimensions mat))
          (rows (first dims))
@@ -36,6 +39,7 @@
 
 
 ;; 矩阵美观打印函数
+;; Matrix pretty print
 (defun print-matrix (mat)
   (let* ((dims (array-dimensions mat))
          (rows (first dims))
@@ -45,10 +49,13 @@
                     do (format t "~A~A" #\Tab (aref mat i j)))
                  (format t "~%")))))
 
+;; print-matrix 的别名
+;; Nickname of print-matrix
 (defun pr (mat) (print-matrix mat))
 
 
 ;; 二元矩阵加法运算
+;; Binary matrix addition
 (defun madd (mat1 mat2)
   (let ((dims1 (array-dimensions mat1))
         (dims2 (array-dimensions mat2)))
@@ -63,11 +70,14 @@
       mat3)))
 
 ;; 拓展的矩阵加法运算
+;; Extended matrix addition
+;; m+ can add n matrices together (n >= 1)
 (defun m+ (mat &rest mats)
   (reduce #'madd (cons mat mats)))
 
 
 ;; 矩阵二元减法运算
+;; Binary subtraction of matrix
 (defun msub (mat1 mat2)
   (let ((dims1 (array-dimensions mat1))
         (dims2 (array-dimensions mat2)))
@@ -82,6 +92,7 @@
       mat3)))
 
 ;; 矩阵取负(反)运算
+;; Build a new matrix with each element negative of the corresponding one in mat
 (defun mminus (mat)
   (let* ((dims (array-dimensions mat))
          (rows (first dims))
@@ -93,13 +104,16 @@
     result))
 
 ;; 拓展的矩阵减法
+;; Extended subtraction of matrix
+;; When there is only one parameter passed, call function #'mminus instead of #'msub
 (defun m- (mat &rest mats)
   (if (null mats)
       (mminus mat)
       (reduce #'msub (cons mat mats))))
 
 
-;; 矩阵乘法运算
+;; 二元矩阵乘法运算
+;; Binary multiplication of matrix
 (defun mmul (mat1 mat2)
   (let* ((dims1 (array-dimensions mat1))
          (dims2 (array-dimensions mat2))
@@ -119,6 +133,7 @@
       result)))
 
 ;; 矩阵数乘运算
+;; Compute a matrix multiplied by a number
 (defun nmul (num mat)
   (let* ((dims (array-dimensions mat))
          (rows (first dims))
@@ -130,6 +145,8 @@
     result))
 
 ;; 混合二元乘法, 两个参数相乘, 每个参数要么是数字要么是矩阵
+;; Mixed binary multiplication of matrix
+;; The two parameters are both required either a number or a matrix
 (defun mix* (num/mat1 num/mat2)
   (cond ((numberp num/mat1) (cond ((numberp num/mat2) (* num/mat1 num/mat2))
                                   (t (nmul num/mat1 num/mat2))))
@@ -137,11 +154,15 @@
         (t (mmul num/mat1 num/mat2))))
 
 ;; 拓展的矩阵乘法
-(defun m* (mat &rest mats)
-  (reduce #'mix* (cons mat mats)))
+;; Extended multiplication of matrix
+;; Function #'m* can take more than one parameter, and each of them should be
+;; either a number or a matrix
+(defun m* (num/mat &rest nums/mats)
+  (reduce #'mix* (cons num/mat nums/mats)))
 
 
-;; 矩阵乘方
+;; 矩阵乘方(矩阵幂运算)
+;; Exponentiation of matrix
 (defun mexpt (mat power)
   (let* ((dims (array-dimensions mat))
          (rows (first dims))
@@ -153,7 +174,7 @@
       result)))
 
 ;; 矩阵转置
-;; Matrix Transpose
+;; Matrix Transposion
 (defun trans (mat)
   (let* ((dims (array-dimensions mat))
          (rows (first dims))
@@ -223,7 +244,8 @@
   
 
 ;; 统计矩阵第 row 行中前导的 0 的个数
-;; aux function
+;; Aux function
+;; Count how many zeros are there in row-th row before a non-zero element
 (defun count-prefix-zeros (mat row)
   (let ((cnt 0))
     (dotimes (col (array-dimension mat 1))
@@ -233,7 +255,8 @@
     cnt))
 
 ;; 将矩阵按照每行前导的 0 的个数的升序重排行
-;; aux function
+;; Aux function
+;; Rearrange the matrix by quantity of prefixed zeros
 (defun rearrangef (mat)
   (let* ((rows (array-dimension mat 0))
          (nums (make-array rows)))
@@ -250,7 +273,7 @@
 
 ;; 化为行阶梯矩阵
 ;; Gaussian elimination (row reduction)
-;; row echelon form
+;; Row echelon form
 (defun row-echelon (mat)
   (let ((tmat (copy-matrix mat)))
     (rearrangef tmat)
@@ -267,7 +290,7 @@
 
 
 ;; 化为行最简矩阵 (行规范型矩阵)
-;; reduced row echelon form / row canonical form
+;; Reduced row echelon form / row canonical form
 (defun row-canonical (mat)
   (let* ((tmat (row-echelon mat))
          (dims (array-dimensions tmat))
@@ -284,17 +307,19 @@
 
 
 ;; 化为列最简矩阵
+;; Reduced col echelon form / col canonical form
 (defun col-canonical (mat)
   (trans (rearrange (row-canonical (trans mat)))))
 
 
 ;; 化为标准型矩阵
+;; Transform the mat to canonical form
 (defun canonical (mat)
   (col-canonical (row-canonical mat)))
 
 
 ;; 矩阵的行秩
-;; row rank of matrix
+;; Row rank of matrix
 (defun row-rank (mat)
   (let* ((tmat (row-echelon mat))
          (dims (array-dimensions tmat))
@@ -312,6 +337,7 @@
 
 
 ;; 矩阵的列秩
+;; Col rank of matrix
 (defun col-rank (mat)
   (row-rank (trans mat)))
 
@@ -324,7 +350,7 @@
 
 
 ;; 逆序数
-;; Inversion
+;; Compute the inversion of the vector vec's permutation
 (defun inversion (vec)
   (let ((len (length vec))
         (cnt 0))
@@ -336,7 +362,9 @@
 
 
 ;; 生成全排列
-;; Permutation
+;; 根据给定的数组生成包含该数组的所有全排列的列表
+;; Generate permutation
+;; Generate a list that includes all the permutations of the given vector
 (defun permutation (vec)
   (let ((result nil))
     (labels ((perm (vec k len)
@@ -349,12 +377,13 @@
       (perm vec 0 (length vec)))
     result))
 
-
+;; 生成一个从 1 到 n 的顺序数组
+;; Generate an ordered vector includes numbers that from 1 to n
 (defun gen-seq-vec (n)
   (make-array n :initial-contents (loop for i from 0 below n collect i)))
 
 ;; 行列式
-;; Determinant
+;; Compute the determinant of a square matrix
 (defun det (mat)
   (let* ((dims (array-dimensions mat))
          (rows (first dims))
@@ -370,6 +399,8 @@
     acc)))
 
 
+;; 生成除第 i 行和第 j 行元素的子矩阵
+;; Generate the submatrix of the matrix mat that exclude i-th row and j-th colum elements
 (defun submatrix (mat i j)
   (let* ((dims (array-dimensions mat))
          (rows (first dims))
@@ -394,7 +425,7 @@
   (det (submatrix mat i j)))
 
 ;; 代数余子式
-;; signed minor of a matrix
+;; Signed minor of a matrix
 (defun cofactor (mat i j)
   (* (expt -1 (+ i j))
      (minor mat i j)))
@@ -423,7 +454,7 @@
 
 
 ;; 矩阵的迹
-;; trace of matrix
+;; Trace of matrix
 (defun tr (mat)
   (assert (reduce #'= (array-dimensions mat)))
   (let ((order (array-dimension mat 0)))
