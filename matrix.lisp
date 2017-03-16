@@ -521,3 +521,11 @@
     (loop for i from 0 below rows
        sum (loop for j from 0 below cols
                 sum (aref mat i j)))))    
+
+
+;; p-范数
+;; Compute p-norm of vector vec
+(defun norm (vec &optional (p 2))
+  (assert (= (apply #'min (array-dimensions vec)) 1))
+  (expt (msum (mapeach #'(lambda (x) (expt x p)) vec))
+        (/ 1 p)))
