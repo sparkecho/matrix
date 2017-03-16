@@ -130,7 +130,9 @@
                        do (incf sum (cl-user::* (aref mat1 i k)
                                                 (aref mat2 k j))))
                     (setf (aref result i j) sum))))
-      result)))
+      (if (and (= m 1) (= p 1))
+          (aref result 0 0)
+          result))))
 
 ;; 矩阵数乘运算
 ;; Compute a matrix multiplied by a number
@@ -459,3 +461,23 @@
   (assert (reduce #'= (array-dimensions mat)))
   (let ((order (array-dimension mat 0)))
     (loop for i from 0 below order sum (aref mat i i))))
+
+;; 计算向量的内积(数量积)
+;; Compute inner product(scalar product) of two vector
+(defun dot (vec1 vec2)
+  (let* ((dims1 (array-dimensions vec1))
+         (rows1 (first dims1))
+         (cols1 (second dims1))
+         (dims2 (array-dimensions vec2))
+         (rows2 (first dims2))
+         (cols2 (second dims2)))
+    (assert (and (= (min rows1 cols1) 1)
+                 (= (min rows2 cols2) 1)
+                 (= (max rows1 cols1) (max rows2 cols2))))
+    (let ((v1 (if (= rows1 1)
+                  vec1
+                  (trans vec1)))
+          (v2 (if (= cols2 1)
+                  vec2
+                  (trans vec2))))
+      (m* v1 v2))))
