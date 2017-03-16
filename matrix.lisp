@@ -500,7 +500,7 @@
 
 ;; 对矩阵的每个元素进行操作
 ;; Do the given function on each element of mat
-(defun map-each (function mat)
+(defun mapeach (function mat)
   (let* ((dims (array-dimensions mat))
          (rows (first dims))
          (cols (second dims))
@@ -510,3 +510,14 @@
              do (setf (aref result i j)
                       (funcall function (aref mat i j)))))
     result))
+
+
+;; 计算矩阵所有元素之和
+;; Compute the sum of all elements of the given mat
+(defun msum (mat)
+  (let* ((dims (array-dimensions mat))
+         (rows (first dims))
+         (cols (second dims)))
+    (loop for i from 0 below rows
+       sum (loop for j from 0 below cols
+                sum (aref mat i j)))))    
