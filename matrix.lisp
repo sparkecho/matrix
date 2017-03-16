@@ -175,6 +175,22 @@
         (setf result (m* result mat)))
       result)))
 
+;; 开平方
+;; 结果中的每个元素为原矩阵中对应元素的平方根
+;; Square root of the matrix
+;; Each element of the result is square root of the corresponding element
+;; of the origin matrix
+(defun msqrt (mat)
+  (let* ((dims (array-dimensions mat))
+         (rows (first dims))
+         (cols (second dims))
+         (result (matrix rows cols)))
+    (loop for i from 0 below rows
+       do (loop for j from 0 below cols
+             do (setf (aref result i j)
+                      (sqrt (aref mat i j)))))
+    result))
+
 ;; 矩阵转置
 ;; Matrix Transposion
 (defun trans (mat)
