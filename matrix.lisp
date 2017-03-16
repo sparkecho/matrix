@@ -529,3 +529,11 @@
   (assert (= (apply #'min (array-dimensions vec)) 1))
   (expt (msum (mapeach #'(lambda (x) (expt (abs x) p)) vec))
         (/ 1 p)))
+
+
+;; 欧几里得距离(欧式距离)
+;; Euclidean distance of two vectors
+(defun euclidean-distance (vec1 vec2)
+  (assert (equal (array-dimensions vec1) (array-dimensions vec2)))
+  (let ((vec (m- vec1 vec2)))
+    (norm vec)))
