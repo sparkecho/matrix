@@ -497,3 +497,16 @@
                   vec2
                   (trans vec2))))
       (m* v1 v2))))
+
+;; 对矩阵的每个元素进行操作
+;; Do the given function on each element of mat
+(defun map-each (function mat)
+  (let* ((dims (array-dimensions mat))
+         (rows (first dims))
+         (cols (second dims))
+         (result (matrix rows cols)))
+    (loop for i from 0 below rows
+       do (loop for j from 0 below cols
+             do (setf (aref result i j)
+                      (funcall function (aref mat i j)))))
+    result))
