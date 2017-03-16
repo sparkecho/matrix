@@ -34,5 +34,10 @@
            #:signed-minor
            #:adj
            #:inv
-           #:tr))
+           #:tr
+           #:dot
+           #:mapeach
+           #:msum
+           #:norm
+           #:euclidean-distance))
 
