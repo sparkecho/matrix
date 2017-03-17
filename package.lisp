@@ -6,6 +6,7 @@
            #:m+
            #:m-
            #:m*
+           #:diag
            #:eye
            #:copy-matrix
            #:pr
