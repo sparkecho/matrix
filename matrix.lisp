@@ -50,6 +50,25 @@
                     (setf (aref mat i j) 0))))
     mat))
 
+;; 判断是否是单位矩阵的谓词
+;; Predicate of if the given matrix is a eye matrix
+(defun eyep (mat)
+  (let* ((dims (array-dimensions mat))
+         (rows (first dims))
+         (cols (second dims)))
+    (and (= rows cols)
+         (> rows 0)
+         (> cols 0)
+         (loop for i from 0 below rows
+            do (unless (loop for j from 0 below cols
+                          do (when (if (= i j)
+                                       (/= (aref mat i j) 1)
+                                       (/= (aref mat i j) 0))
+                               (return nil))
+                          finally (return t))
+                 (return nil))
+            finally (return t)))))
+
 
 ;; Build a new matrix with the same content of mat
 (defun copy-matrix (mat)
