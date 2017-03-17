@@ -7,7 +7,9 @@
            #:m-
            #:m*
            #:diag
+           #:diagp
            #:eye
+           #:eyep
            #:copy-matrix
            #:pr
            #:print-matrix
