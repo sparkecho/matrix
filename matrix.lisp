@@ -15,6 +15,15 @@
                       (setf (aref mat i j) (svref initvec k))))))
     mat))
 
+;; 构造以给定向量中元素为对角线元素的对角矩阵
+;; Build a diagonal matrix which has all elements in the given vector
+(defun diag (initvec)
+  (let* ((order (length initvec))
+         (result (matrix order order)))
+    (loop for i from 0 below order
+       do (setf (aref result i i) (aref initvec i)))
+    result))
+
 ;; 单位矩阵构造函数
 ;; Build a `n order' eye matrix (identity matrix)
 (defun eye (n)
@@ -25,6 +34,7 @@
                     (setf (aref mat i j) 1)
                     (setf (aref mat i j) 0))))
     mat))
+
 
 ;; Build a new matrix with the same content of mat
 (defun copy-matrix (mat)
