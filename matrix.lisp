@@ -52,9 +52,8 @@
 ;; 判断是否是单位矩阵的谓词
 ;; Predicate of if the given matrix is a eye matrix
 (defun eyep (mat)
-  (let* ((dims (array-dimensions mat))
-         (rows (first dims))
-         (cols (second dims)))
+  (let* ((rows (array-dimension mat 0))
+         (cols (array-dimension mat 1)))
     (and (= rows cols)
          (> rows 0)
          (> cols 0)
