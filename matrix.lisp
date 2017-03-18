@@ -97,16 +97,16 @@
 ;; 二元矩阵加法运算
 ;; Binary matrix addition
 (defun madd (mat1 mat2)
-  (let ((dims1 (array-dimensions mat1))
-        (dims2 (array-dimensions mat2)))
-    (assert (equal dims1 dims2))
-    (let* ((rows (first dims1))
-           (cols (second dims1))
-           (mat3 (matrix rows cols)))
-      (loop for i from 0 below rows
-         do (loop for j from 0 below cols
+  (let ((rows1 (array-dimension mat1 0))
+        (cols1 (array-dimension mat1 1))
+        (rows2 (array-dimension mat2 0))
+        (cols2 (array-dimension mat2 1)))
+    (assert (and (= rows1 rows2) (= cols1 cols2)))
+    (let ((mat3 (matrix rows1 cols1)))
+      (loop for i from 0 below rows1
+         do (loop for j from 0 below cols1
                do (setf (aref mat3 i j)
-                        (cl-user::+ (aref mat1 i j) (aref mat2 i j)))))
+                        (+ (aref mat1 i j) (aref mat2 i j)))))
       mat3)))
 
 ;; 拓展的矩阵加法运算
@@ -119,16 +119,16 @@
 ;; 矩阵二元减法运算
 ;; Binary subtraction of matrix
 (defun msub (mat1 mat2)
-  (let ((dims1 (array-dimensions mat1))
-        (dims2 (array-dimensions mat2)))
-    (assert (equal dims1 dims2))
-    (let* ((rows (first dims1))
-           (cols (second dims1))
-           (mat3 (matrix rows cols)))
-      (loop for i from 0 below rows
-         do (loop for j from 0 below cols
+  (let ((rows1 (array-dimension mat1 0))
+        (cols1 (array-dimension mat1 1))
+        (rows2 (array-dimension mat2 0))
+        (cols2 (array-dimension mat2 1)))
+    (assert (and (= rows1 rows2) (= cols1 cols2)))
+    (let ((mat3 (matrix rows1 cols1)))
+      (loop for i from 0 below rows1
+         do (loop for j from 0 below cols1
                do (setf (aref mat3 i j)
-                        (cl-user::- (aref mat1 i j) (aref mat2 i j)))))
+                        (- (aref mat1 i j) (aref mat2 i j)))))
       mat3)))
 
 ;; 矩阵取负(反)运算
@@ -154,22 +154,18 @@
 ;; 二元矩阵乘法运算
 ;; Binary multiplication of matrix
 (defun mmul (mat1 mat2)
-  (let* ((dims1 (array-dimensions mat1))
-         (dims2 (array-dimensions mat2))
-         (m (first dims1))
-         (n (second dims1))
-         (q (first dims2))
-         (p (second dims2)))
-    (assert (= n q))
-    (let ((result (matrix m p)))
-      (loop for i from 0 below m
-         do (loop for j from 0 below p
-               do (let ((sum 0))
-                    (loop for k from 0 below n
-                       do (incf sum (cl-user::* (aref mat1 i k)
-                                                (aref mat2 k j))))
-                    (setf (aref result i j) sum))))
-      (if (and (= m 1) (= p 1))
+  (let ((rows1 (array-dimension mat1 0))
+        (cols1 (array-dimension mat1 1))
+        (rows2 (array-dimension mat2 0))
+        (cols2 (array-dimension mat2 1)))
+    (assert (= cols1 rows2))
+    (let ((result (matrix rows1 cols2)))
+      (loop for i from 0 below rows1
+         do (loop for j from 0 below cols2
+               do (setf (aref result i j)
+                        (loop for k from 0 below cols1
+                           sum (* (aref mat1 i k) (aref mat2 k j))))))
+      (if (and (= rows1 1) (= cols2 1))
           (aref result 0 0)
           result))))
 
