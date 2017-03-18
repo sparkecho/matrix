@@ -27,8 +27,8 @@
 ;; 判断是否是对角矩阵的谓词
 ;; Predicate of if the given matrix is a diag matrix
 (defun diagp (mat)
-  (let* ((rows (array-dimension mat 0))
-         (cols (array-dimension mat 1)))
+  (let ((rows (array-dimension mat 0))
+        (cols (array-dimension mat 1)))
     (loop for i from 0 below rows
        do (unless (loop for j from 0 below cols
                      do (when (and (/= (aref mat i j) 0) (/= i j))
@@ -52,8 +52,8 @@
 ;; 判断是否是单位矩阵的谓词
 ;; Predicate of if the given matrix is a eye matrix
 (defun eyep (mat)
-  (let* ((rows (array-dimension mat 0))
-         (cols (array-dimension mat 1)))
+  (let ((rows (array-dimension mat 0))
+        (cols (array-dimension mat 1)))
     (and (= rows cols)
          (> rows 0)
          (> cols 0)
@@ -70,9 +70,8 @@
 
 ;; Build a new matrix with the same content of mat
 (defun copy-matrix (mat)
-  (let* ((dims (array-dimensions mat))
-         (rows (first dims))
-         (cols (second dims))
+  (let* ((rows (array-dimension mat 0))
+         (cols (array-dimension mat 1))
          (copy (matrix rows cols)))
     (loop for i from 0 below rows
        do (loop for j from 0 below cols
@@ -83,9 +82,8 @@
 ;; 矩阵美观打印函数
 ;; Matrix pretty print
 (defun print-matrix (mat)
-  (let* ((dims (array-dimensions mat))
-         (rows (first dims))
-         (cols (second dims)))
+  (let ((rows (array-dimension mat 0))
+        (cols (array-dimension mat 1)))
     (loop for i from 0 below rows
        do (progn (loop for j from 0 below cols
                     do (format t "~A~A" #\Tab (aref mat i j)))
@@ -136,9 +134,8 @@
 ;; 矩阵取负(反)运算
 ;; Build a new matrix with each element negative of the corresponding one in mat
 (defun mminus (mat)
-  (let* ((dims (array-dimensions mat))
-         (rows (first dims))
-         (cols (second dims))
+  (let* ((rows (array-dimension mat 0))
+         (cols (array-dimension mat 1))
          (result (matrix rows cols)))
     (loop for i from 0 below rows
        do (loop for j from 0 below cols
@@ -179,9 +176,8 @@
 ;; 矩阵数乘运算
 ;; Compute a matrix multiplied by a number
 (defun nmul (num mat)
-  (let* ((dims (array-dimensions mat))
-         (rows (first dims))
-         (cols (second dims))
+  (let* ((rows (array-dimension mat 0))
+         (cols (array-dimension mat 1))
          (result (matrix rows cols)))
     (loop for i from 0 below rows
        do (loop for j from 0 below cols
@@ -208,9 +204,8 @@
 ;; 矩阵乘方(矩阵幂运算)
 ;; Exponentiation of matrix
 (defun mexpt (mat power)
-  (let* ((dims (array-dimensions mat))
-         (rows (first dims))
-         (cols (second dims)))
+  (let ((rows (array-dimension mat 0))
+        (cols (array-dimension mat 1)))
     (assert (= rows cols))
     (let ((result (eye rows)))
       (dotimes (i power)
@@ -223,9 +218,8 @@
 ;; Each element of the result is square root of the corresponding element
 ;; of the origin matrix
 (defun msqrt (mat)
-  (let* ((dims (array-dimensions mat))
-         (rows (first dims))
-         (cols (second dims))
+  (let* ((rows (array-dimension mat 0))
+         (cols (array-dimension mat 1))
          (result (matrix rows cols)))
     (loop for i from 0 below rows
        do (loop for j from 0 below cols
@@ -236,9 +230,8 @@
 ;; 矩阵转置
 ;; Matrix Transposion
 (defun trans (mat)
-  (let* ((dims (array-dimensions mat))
-         (rows (first dims))
-         (cols (second dims))
+  (let* ((rows (array-dimension mat 0))
+         (cols (array-dimension mat 1))
          (result (matrix cols rows)))
     (loop for i from 0 below rows
        do (loop for j from 0 below cols
@@ -337,9 +330,8 @@
 (defun row-echelon (mat)
   (let ((tmat (copy-matrix mat)))
     (rearrangef tmat)
-    (let* ((dims (array-dimensions tmat))
-           (rows (first dims))
-           (cols (second dims)))
+    (let ((rows (array-dimension mat 0))
+          (cols (array-dimension mat 1)))
       (loop for i from 0 below (1- rows)
          do (let ((pos (count-prefix-zeros tmat i)))
               (loop for j from (1+ i) below rows
@@ -352,10 +344,9 @@
 ;; 化为行最简矩阵 (行规范型矩阵)
 ;; Reduced row echelon form / row canonical form
 (defun row-canonical (mat)
-  (let* ((tmat (row-echelon mat))
-         (dims (array-dimensions tmat))
-         (rows (first dims))
-         (cols (second dims)))
+  (let ((tmat (row-echelon mat))
+        (rows (array-dimension mat 0))
+        (cols (array-dimension mat 1)))
     (loop for j from (1- rows) downto 1
        do (let ((pos (count-prefix-zeros tmat j)))
             (when (/= pos cols)
@@ -382,9 +373,8 @@
 ;; Row rank of matrix
 (defun row-rank (mat)
   (let* ((tmat (row-echelon mat))
-         (dims (array-dimensions tmat))
-         (rows (first dims))
-         (cols (second dims))
+         (rows (array-dimension mat 0))
+         (cols (array-dimension mat 1))
          (rank rows))
     (loop for i from (1- rows) downto 0
        do (let ((flag t))
@@ -445,9 +435,8 @@
 ;; 行列式
 ;; Compute the determinant of a square matrix
 (defun det (mat)
-  (let* ((dims (array-dimensions mat))
-         (rows (first dims))
-         (cols (second dims)))
+  (let ((rows (array-dimension mat 0))
+        (cols (array-dimension mat 1)))
   (assert (= rows cols))
   (let ((permutations (permutation (gen-seq-vec rows)))
         (acc 0))
@@ -462,9 +451,8 @@
 ;; 生成除第 i 行和第 j 行元素的子矩阵
 ;; Generate the submatrix of the matrix mat that exclude i-th row and j-th colum elements
 (defun submatrix (mat i j)
-  (let* ((dims (array-dimensions mat))
-         (rows (first dims))
-         (cols (second dims))
+  (let* ((rows (array-dimension mat 0))
+         (cols (array-dimension mat 1))
          (result (matrix (1- rows) (1- cols))))
     (loop for r from 0 below (1- rows)
        do (if (< r i)              
@@ -523,12 +511,10 @@
 ;; 计算向量的内积(数量积)
 ;; Compute inner product(scalar product) of two vector
 (defun dot (vec1 vec2)
-  (let* ((dims1 (array-dimensions vec1))
-         (rows1 (first dims1))
-         (cols1 (second dims1))
-         (dims2 (array-dimensions vec2))
-         (rows2 (first dims2))
-         (cols2 (second dims2)))
+  (let ((rows1 (array-dimension vec1 0))
+        (cols1 (array-dimension vec1 1))
+        (rows2 (array-dimension vec2 0))
+        (cols2 (array-dimension vec2 1)))
     (assert (and (= (min rows1 cols1) 1)
                  (= (min rows2 cols2) 1)
                  (= (max rows1 cols1) (max rows2 cols2))))
@@ -543,9 +529,8 @@
 ;; 对矩阵的每个元素进行操作
 ;; Do the given function on each element of mat
 (defun mapeach (function mat)
-  (let* ((dims (array-dimensions mat))
-         (rows (first dims))
-         (cols (second dims))
+  (let* ((rows (array-dimension mat 0))
+         (cols (array-dimension mat 1))
          (result (matrix rows cols)))
     (loop for i from 0 below rows
        do (loop for j from 0 below cols
@@ -557,9 +542,8 @@
 ;; 计算矩阵所有元素之和
 ;; Compute the sum of all elements of the given mat
 (defun msum (mat)
-  (let* ((dims (array-dimensions mat))
-         (rows (first dims))
-         (cols (second dims)))
+  (let ((rows (array-dimension mat 0))
+        (cols (array-dimension mat 1)))
     (loop for i from 0 below rows
        sum (loop for j from 0 below cols
                 sum (aref mat i j)))))    
