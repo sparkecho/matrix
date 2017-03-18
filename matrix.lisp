@@ -2,16 +2,14 @@
 
 (in-package #:matrix)
 
-;;; "matrix" goes here. Hacks and glory await!
-
 ;; 矩阵构造函数
 ;; Constructor function of matrix
 (defun matrix (rows cols &optional initvec)
   (let ((mat (make-array (list rows cols) :initial-element 0)))
-    (if initvec
+    (when initvec
         (loop for i from 0 below rows
            do (loop for j from 0 below cols
-                 do (let ((k (cl-user::+ (cl-user::* i cols) j)))
+                 do (let ((k (+ (* i cols) j)))
                       (setf (aref mat i j) (svref initvec k))))))
     mat))
 
