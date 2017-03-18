@@ -27,9 +27,8 @@
 ;; 判断是否是对角矩阵的谓词
 ;; Predicate of if the given matrix is a diag matrix
 (defun diagp (mat)
-  (let* ((dims (array-dimensions mat))
-         (rows (first dims))
-         (cols (second dims)))
+  (let* ((rows (array-dimension mat 0))
+         (cols (array-dimension mat 1)))
     (loop for i from 0 below rows
        do (unless (loop for j from 0 below cols
                      do (when (and (/= (aref mat i j) 0) (/= i j))
