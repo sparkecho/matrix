@@ -6,5 +6,6 @@
   :license "GPL"
   :serial t
   :components ((:file "package")
+               (:file "utils")
                (:file "matrix")))
 
