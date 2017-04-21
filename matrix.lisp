@@ -11,11 +11,11 @@
   (data nil))
 
 
-;;; A iterator for 2 level loop with anaphor macro (row-index & col-index)
-;;; (`row-index',`col-index') has value from (`start-row',`start-col') to
-;;; (`end-row',`end-col')
-(defmacro with-row-col ((&key (start-row 0) (start-col 0) (end-row 0) (end-col 0))
-                       &body body)
+;;; A iterator for 2 level loop with anaphor macro (i & j)
+;;; (i,j) has value vary from (`start-row',`start-col') to
+;;; (`end-row'-1,`end-col'-1)
+(defmacro with-i-j ((end-row end-col &key (start-row 0) (start-col 0))
+                    &body body)
   `(loop for i from ,start-row below ,end-row
       do (loop for j from ,start-col below ,end-col
             do (progn ,@body))))
@@ -49,21 +49,28 @@
   (declare (ignore depth))
   (let* ((data (matrix-data matrix))
          (rows (array-dimension data 0))
-         (cols (array-dimension data 1)))
+         (cols (array-dimension data 1))
+         (max-length 0))
     (dotimes (i rows)
       (dotimes (j cols)
-        (format stream "~A~A" #\Tab (aref data i j)))
-      (format stream "~%"))))
+        (let ((len (length (write-to-string (aref data i j)))))
+          (when (> len max-length)
+            (setf max-length len)))))
+    (incf max-length 2)          ;make sure 2 spaces to separate datas
+    (dotimes (i rows)
+      (format stream "~&")
+      (dotimes (j cols)
+        (format-mincol stream max-length (aref data i j))))))
 
 
 ;;; Transform a vector to a 2 dimentions array
 (defun vector-to-array2d (vector rows cols &key (element-type 'fixnum))
   (assert (= (length vector) (* rows cols)))
   (let ((array2d (make-array (list rows cols) :element-type element-type)))
-    (dotimes (i rows)
-      (dotimes (j cols)
-        (setf (aref array2d i j) (aref vector (+ (* cols i) j)))))
+    (with-i-j (rows cols)
+      (setf (aref array2d i j) (aref vector (+ (* cols i) j))))
     array2d))
+
 
 ;;; Return a copy of the given 2 dimentions array
 (defun copy-array2d (array2d rows cols &key (element-type 'fixnum))
@@ -71,9 +78,8 @@
         (src-cols (array-dimension array2d 1)))
     (assert (and (= src-rows rows) (= src-cols cols)))
     (let ((dst-array2d (make-array (list rows cols) :element-type element-type)))
-      (dotimes (i rows)
-        (dotimes (j cols)
-          (setf (aref dst-array2d i j) (aref array2d i j))))
+      (with-i-j (rows cols)
+        (setf (aref dst-array2d i j) (aref array2d i j)))
       dst-array2d)))
 
 ;;; Transform a list to a 2 dimentions array
@@ -125,20 +131,21 @@
 
 ;;; Make the given matrix to be a diagonal matrix with given element as
 ;;; diagonal elements or with given vector as diagonal elements
-(defun diagf (matrix &key (diagonal-element 1) diagonal-contents)
+(defun diagonalf (matrix &key (diagonal-element 1) diagonal-contents)
   (if (null diagonal-contents)
       (let ((data (matrix-data matrix)))
-        (dotimes (i (matrix-rows matrix))
-          (dotimes (j (matrix-cols matrix))
-            (if (= i j)
-                (setf (aref data i j) diagonal-element)
-                (setf (aref data i j) 0)))))
+        (with-i-j ((matrix-rows matrix)  (matrix-cols matrix))
+          (if (= i j)
+              (setf (aref data i j) diagonal-element)
+              (setf (aref data i j) 0))))
       (diagonal-from-contents matrix diagonal-contents))
   matrix)
 
+(alias diagf diagonalf)
+
 
 ;;; Build a diagonal matrix which has all elements in the given vector/list
-(defun diag (rows cols &key (diagonal-element 1) diagonal-contents (type 'fixnum))
+(defun diagonal-matrix (rows cols &key (diagonal-element 1) diagonal-contents (type 'fixnum))
   (let ((matrix (matrix rows cols :element-type type)))
     (if (null diagonal-contents)
         (let ((data (matrix-data matrix)))
@@ -146,11 +153,13 @@
             (setf (aref data i i) diagonal-element)))
         (diagonal-from-contents matrix diagonal-contents))
     matrix))
-      
+
+(alias diag diagonal-matrix)
+
 
 ;; 判断是否是对角矩阵的谓词
 ;; Predicate of if the given matrix is a diag matrix
-(defun diagp (matrix)
+(defun diagonal-matrix-p (matrix)
   (let ((data (matrix-data matrix)))
     (loop for i from 0 below (matrix-rows matrix)
        do (unless (loop for j from 0 below (matrix-cols matrix)
@@ -162,16 +171,20 @@
             (return nil))
        finally (return t))))
 
+(alias diagp diagonal-matrix-p)
+
 
 ;; 单位矩阵构造函数
-;; Build a `n order' eye matrix (identity matrix)
-(defun eye (n &key (type 'fixnum))
+;; Build a `n order' identity matrix (eye matrix)
+(defun identity-matrix (n &key (type 'fixnum))
   (diag n n :type type))
+
+(alias eye identity-matrix)
 
 
 ;; 判断是否是单位矩阵的谓词
-;; Predicate of if the given matrix is a eye matrix
-(defun eyep (matrix)
+;; Predicate of if the given matrix is an identity matrix
+(defun identity-matrix-p (matrix)
   (let ((rows (matrix-rows matrix))
         (cols (matrix-cols matrix))
         (data (matrix-data matrix)))
@@ -188,18 +201,19 @@
                  (return nil))
             finally (return t)))))
 
+(alias eyep identity-matrix-p)
+
 
 ;; Build a new matrix with the same content of mat
 (defun copy-matrix (matrix)
   (let* ((rows (matrix-rows matrix))
          (cols (matrix-cols matrix))
          (data (matrix-data matrix))
-         (copy (matrix rows cols :element-type (matrix-type matrix))))
-    (loop for i from 0 below rows
-       do (loop for j from 0 below cols
-             do (setf (aref copy i j) (aref mat i j))))
+         (copy (matrix rows cols :element-type (matrix-type matrix)))
+         (data-of-copy (matrix-data copy)))
+    (with-i-j (rows cols)
+      (setf (aref data-of-copy i j) (aref data i j)))
     copy))
-
 
 
 ;; ;; 二元矩阵加法运算
