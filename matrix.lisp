@@ -48,11 +48,6 @@
                 do (progn
                      ,@(subst `(aref ,data i j) `,elt `,body)))))))
 
-;; (defmacro with-matrices ((((elt1 matrix1) (elt2 matrix2) &rest args)
-;;                           &key (start-row 0) (start-col 0) (end-row nil) (end-col nil))
-;;                          &body body)
-;;   `(list ',elt1 ',matrix1 ',elt2 ',matrix2 ',args ',start-row ',start-col ',end-row ',end-col ',body))
-
 
 ;;; Matrix pretty print function
 (defun print-matrix (matrix stream depth)
@@ -129,8 +124,13 @@
 
 
 ;;; A easier way to build matrix
-;;; Usage: #m(1 2 3)         =>   rows = 1, cols = 3
-;;;        #m((1 2) ( 2 1))  =>   rows = 2, cols = 2
+;;; Usage:
+;;;   #m()              =>   rows = 0, cols = 0, data = #2A()
+;;;   #2m()             =>   rows = 2, cols = 2, data = #2A((0 0) (0 0))
+;;;   #3m(1)            =>   rows = 3, cols = 3, data = #2A((1 1 1) (1 1 1) (1 1 1))
+;;;   #2m(1 2)          =>   rows = 2, cols = 2, data = #2A((1 0) (0 2))
+;;;   #m(1 2 3 4)       =>   rows = 1, cols = 4, data = #2A((1 2 3 4))
+;;;   #m((1 2) ( 2 1))  =>   rows = 2, cols = 2, data = #2A((1 2) (2 1))
 (set-dispatch-macro-character #\# #\m
                               #'(lambda (stream c n)
                                   (declare (ignore c))
@@ -240,7 +240,6 @@
       copy)))
 
 
-
 ;;; Matrix binary addition
 (defun madd (matrix1 matrix2 &key type)
   (with-slots ((rows1 rows) (cols1 cols) (type1 type) (data1 data)) matrix1
@@ -253,6 +252,7 @@
             (setf (aref data3 i j)
                   (+ (aref data1 i j) (aref data2 i j))))
           matrix3))))
+
 
 ;; Extended matrix addition, &rest argment supported
 ;; m+ can add n matrices together (n >= 1)
@@ -319,6 +319,7 @@
         (setf e (* num (aref data i j))))
       result)))
 
+
 ;;; 混合二元乘法, 两个参数相乘, 每个参数要么是数字要么是矩阵
 ;;; Mixed binary multiplication of matrix
 ;;; The two parameters are both required either a number or a matrix
@@ -328,6 +329,7 @@
                (t (nmul num/mat1 num/mat2))))
         ((numberp num/mat2) (nmul num/mat2 num/mat1))
         (t (mmul num/mat1 num/mat2))))
+
 
 ;;; 拓展的矩阵乘法
 ;;; Extended multiplication of matrix
@@ -368,9 +370,11 @@
       result)))
 
 
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; 初等行变换
 ;;; Elementary row operation
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 ;;; 倍法变换
 ;;; Row multiplication
@@ -379,6 +383,7 @@
     (dotimes (col cols)
       (setf (aref data i col) (* k (aref data i col))))
     matrix))
+
 
 ;;; 消法变换
 ;;; Row addition
@@ -389,6 +394,7 @@
             (* k (aref data j col))))
     matrix))
 
+
 ;;; 换法变换
 ;;; Row switching
 (defun matrix-row-switchf (matrix i j)
@@ -398,8 +404,11 @@
     matrix))
 
 
-;;; 初等行变换
-;;; Elementary row operation
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 初等列变换
+;;; Elementary col operation
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 ;;; 倍法变换
 ;;; Col multiplication
@@ -426,9 +435,11 @@
     matrix))
 
 
-
-;;; 初等行变换
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 二维数组初等行变换
 ;;; Elementary row operation on array2d
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 ;; 倍法变换
 ;; Row multiplication on array2d
@@ -438,6 +449,7 @@
        do (setf (aref array2d i col) (* k (aref array2d i col))))
     array2d))
 
+
 ;; 消法变换
 ;; Row addition on array2d
 (defun row-addf (array2d i j k)
@@ -446,6 +458,7 @@
        do (incf (aref array2d i col) (* k (aref array2d j col))))
     array2d))
 
+
 ;; 换法变换
 ;; Row switching on array2d
 (defun row-switchf (array2d i j)
@@ -453,10 +466,13 @@
     (loop for col from 0 below cols
        do (rotatef (aref array2d i col) (aref array2d j col)))
     array2d))
-  
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; 初等行变换
 ;;; Elementary row operation on array2d
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 ;; 倍法变换
 ;; Col multiplication on array2d
@@ -466,6 +482,7 @@
        do (setf (aref array2d row i) (* k (aref array2d row i))))
     array2d))
 
+
 ;; 消法变换
 ;; Col addition on array2d
 (defun col-addf (array2d i j k)
@@ -474,6 +491,7 @@
        do (incf (aref array2d row j) (* k (aref array2d row i))))
     array2d))
 
+
 ;; 换法变换
 ;; Col switching on array2d
 (defun col-switchf (array2d i j)
@@ -481,7 +499,7 @@
     (loop for row from 0 below rows
        do (rotatef (aref array2d row i) (aref array2d row j)))
     array2d))
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ends
 
 
 ;;; 统计矩阵第 row 行中前导的 0 的个数
@@ -589,7 +607,6 @@
        (row-rank (row-canonical (trans matrix)))))
 
 
-
 ;;; 逆序数
 ;;; Compute the inversion of the vector vec's permutation
 (defun inversion (vec)
@@ -624,20 +641,7 @@
 (defun gen-seq-vec (n)
   (make-array n :initial-contents (loop for i from 0 below n collect i)))
 
-;; ;; 行列式
-;; ;; Compute the determinant of a square matrix
-;; (defun det (mat)
-;;   (let ((rows (array-dimension mat 0))
-;;         (cols (array-dimension mat 1)))
-;;   (assert (= rows cols))
-;;   (let ((permutations (permutation (gen-seq-vec rows)))
-;;         (acc 0))
-;;     (dolist (perm permutations)
-;;       (let ((mul 1))                    ;multiplicative
-;;         (dotimes (i rows)
-;;           (setf mul (* mul (aref mat i (svref perm i)))))
-;;         (incf acc (* mul (expt -1 (inversion perm))))))
-;;     acc)))
+
 ;;; 行列式
 ;;; Compute the determinant of a square matrix
 (defun det (matrix)
@@ -676,6 +680,7 @@
 ;;; Minor
 (defun minor (matrix i j)
   (det (submatrix matrix i j)))
+
 
 ;;; 代数余子式
 ;;; Signed minor of a matrix
