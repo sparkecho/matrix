@@ -40,7 +40,7 @@
 
 ;; (defmacro with-matrices ((((elt1 matrix1) (elt2 matrix2) &rest args)
 ;;                           &key (start-row 0) (start-col 0) (end-row nil) (end-col nil))
-;;                          &body body)  
+;;                          &body body)
 ;;   `(list ',elt1 ',matrix1 ',elt2 ',matrix2 ',args ',start-row ',start-col ',end-row ',end-col ',body))
 
 
@@ -51,11 +51,10 @@
          (rows (array-dimension data 0))
          (cols (array-dimension data 1))
          (max-length 0))
-    (dotimes (i rows)
-      (dotimes (j cols)
-        (let ((len (length (write-to-string (aref data i j)))))
-          (when (> len max-length)
-            (setf max-length len)))))
+    (with-i-j (rows cols)
+      (let ((len (length (write-to-string (aref data i j)))))
+        (when (> len max-length)
+          (setf max-length len))))
     (incf max-length 2)          ;make sure 2 spaces to separate datas
     (dotimes (i rows)
       (format stream "~&")
@@ -99,7 +98,7 @@
              do (multiple-value-bind (i j) (floor k cols)
                   (setf (aref array2d i j) e))))
       array2d)))
-    
+
 
 ;;; Constructor function of matrix, build a matrix
 (defun matrix (rows cols &key (initial-element 0) initial-contents (element-type 'fixnum))
@@ -215,6 +214,25 @@
       (setf (aref data-of-copy i j) (aref data i j)))
     copy))
 
+
+
+;;; Matrix binary addition
+(defun madd (matrix1 matrix2 &key type)
+  (let ((rows1 (matrix-rows matrix1))
+        (cols1 (matrix-cols matrix1))
+        (rows2 (matrix-rows matrix2))
+        (cols2 (matrix-cols matrix2))
+        (data1 (matrix-data matrix1))
+        (data2 (matrix-data matrix2))
+        (type3 (or type
+                   (type-strategy (matrix-type matrix1) (matrix-type matrix2)))))
+    (assert (and (= rows1 rows2) (= cols1 cols2)))
+    (let* ((matrix3 (matrix rows1 cols1 :element-type type3))
+           (data3 (matrix-data matrix3)))
+      (with-i-j (rows1 cols1)
+        (setf (aref data3 i j)
+              (+ (aref data1 i j) (aref data2 i j))))
+      matrix3)))
 
 ;; ;; 二元矩阵加法运算
 ;; ;; Binary matrix addition
@@ -355,7 +373,7 @@
 ;;        do (loop for j from 0 below cols
 ;;              do (setf (aref result j i) (aref mat i j))))
 ;;     result))
-  
+
 
 
 ;; ;;; 初等行变换
@@ -384,7 +402,7 @@
 ;;     (loop for col from 0 below cols
 ;;        do (rotatef (aref mat i col) (aref mat j col)))
 ;;     mat))
-  
+
 
 ;; ;;; 初等行变换
 ;; ;;; Elementary row operation
@@ -412,7 +430,7 @@
 ;;     (loop for row from 0 below rows
 ;;        do (rotatef (aref mat row i) (aref mat row j)))
 ;;     mat))
-  
+
 
 ;; ;; 统计矩阵第 row 行中前导的 0 的个数
 ;; ;; Aux function
@@ -514,7 +532,7 @@
 ;; (defun rank (mat)
 ;;   (min (row-rank (row-canonical mat))
 ;;        (row-rank (row-canonical (trans mat)))))
-               
+
 
 
 ;; ;; 逆序数
@@ -573,7 +591,7 @@
 ;;          (cols (array-dimension mat 1))
 ;;          (result (matrix (1- rows) (1- cols))))
 ;;     (loop for r from 0 below (1- rows)
-;;        do (if (< r i)              
+;;        do (if (< r i)
 ;;               (loop for c from 0 below (1- cols)
 ;;                  do (if (< c j)
 ;;                         (setf (aref result r c) (aref mat r c))
@@ -664,7 +682,7 @@
 ;;         (cols (array-dimension mat 1)))
 ;;     (loop for i from 0 below rows
 ;;        sum (loop for j from 0 below cols
-;;                 sum (aref mat i j)))))    
+;;                 sum (aref mat i j)))))
 
 
 ;; ;; p-范数
