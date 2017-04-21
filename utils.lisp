@@ -36,3 +36,12 @@
                                      tree)
                               (cdr new-and-old))))))
     (rec-subst tree new-and-old)))
+
+
+;;; Set nickname for functions
+;;; e.g. (alias eye identity-matrix)
+;;; After the setting, you can use function eye the same
+;;; as identity-matrix
+(defmacro alias (dst-name src-name)
+  `(setf (symbol-function ',dst-name)
+         (symbol-function ',src-name)))
