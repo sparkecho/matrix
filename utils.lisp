@@ -45,3 +45,13 @@
 (defmacro alias (dst-name src-name)
   `(setf (symbol-function ',dst-name)
          (symbol-function ',src-name)))
+
+
+;;; Make mincol `n' in format ~nD support variable
+;;; (format stream "~nD" n num) 
+(defmacro format-mincol (stream n num)
+  (let ((str (gensym)))
+    `(let ((,str (concatenate
+                  'string
+                  "~" (write-to-string ,n) "D")))
+       (format ,stream ,str ,num))))
