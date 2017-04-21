@@ -50,16 +50,21 @@
   (let* ((data (matrix-data matrix))
          (rows (array-dimension data 0))
          (cols (array-dimension data 1))
+         (elt-len-arr (make-array (list rows cols)
+                                  :element-type '(unsigned-byte 8)))
          (max-length 0))
     (with-i-j (rows cols)
       (let ((len (length (write-to-string (aref data i j)))))
+        (setf (aref elt-len-arr i j) len)
         (when (> len max-length)
           (setf max-length len))))
-    (incf max-length 2)          ;make sure 2 spaces to separate datas
     (dotimes (i rows)
       (format stream "~&")
       (dotimes (j cols)
-        (format-mincol stream max-length (aref data i j))))))
+        (format stream "~A~A"
+                ;; make sure at least 2 spaces to separate datas
+                (add-spaces "  " (- max-length (aref elt-len-arr i j)))
+                (aref data i j))))))
 
 
 ;;; Transform a vector to a 2 dimentions array
@@ -234,61 +239,50 @@
               (+ (aref data1 i j) (aref data2 i j))))
       matrix3)))
 
-;; ;; 二元矩阵加法运算
-;; ;; Binary matrix addition
-;; (defun madd (mat1 mat2)
-;;   (let ((rows1 (array-dimension mat1 0))
-;;         (cols1 (array-dimension mat1 1))
-;;         (rows2 (array-dimension mat2 0))
-;;         (cols2 (array-dimension mat2 1)))
-;;     (assert (and (= rows1 rows2) (= cols1 cols2)))
-;;     (let ((mat3 (matrix rows1 cols1)))
-;;       (loop for i from 0 below rows1
-;;          do (loop for j from 0 below cols1
-;;                do (setf (aref mat3 i j)
-;;                         (+ (aref mat1 i j) (aref mat2 i j)))))
-;;       mat3)))
-
-;; ;; 拓展的矩阵加法运算
-;; ;; Extended matrix addition
-;; ;; m+ can add n matrices together (n >= 1)
-;; (defun m+ (mat &rest mats)
-;;   (reduce #'madd (cons mat mats)))
+;; Extended matrix addition, &rest argment supported
+;; m+ can add n matrices together (n >= 1)
+(defun m+ (matrix &rest matrices)
+  (reduce #'madd (cons matrix matrices)))
 
 
-;; ;; 矩阵二元减法运算
-;; ;; Binary subtraction of matrix
-;; (defun msub (mat1 mat2)
-;;   (let ((rows1 (array-dimension mat1 0))
-;;         (cols1 (array-dimension mat1 1))
-;;         (rows2 (array-dimension mat2 0))
-;;         (cols2 (array-dimension mat2 1)))
-;;     (assert (and (= rows1 rows2) (= cols1 cols2)))
-;;     (let ((mat3 (matrix rows1 cols1)))
-;;       (loop for i from 0 below rows1
-;;          do (loop for j from 0 below cols1
-;;                do (setf (aref mat3 i j)
-;;                         (- (aref mat1 i j) (aref mat2 i j)))))
-;;       mat3)))
+;;; Matrix binary subtraction
+(defun msub (matrix1 matrix2 &key type)
+  (let ((rows1 (matrix-rows matrix1))
+        (cols1 (matrix-cols matrix1))
+        (rows2 (matrix-rows matrix2))
+        (cols2 (matrix-cols matrix2))
+        (data1 (matrix-data matrix1))
+        (data2 (matrix-data matrix2))
+        (type3 (or type
+                   (type-strategy (matrix-type matrix1) (matrix-type matrix2)))))
+    (assert (and (= rows1 rows2) (= cols1 cols2)))
+    (let* ((matrix3 (matrix rows1 cols1 :element-type type3))
+           (data3 (matrix-data matrix3)))
+      (with-i-j (rows1 cols1)
+        (setf (aref data3 i j)
+              (- (aref data1 i j) (aref data2 i j))))
+      matrix3)))
 
-;; ;; 矩阵取负(反)运算
-;; ;; Build a new matrix with each element negative of the corresponding one in mat
-;; (defun mminus (mat)
-;;   (let* ((rows (array-dimension mat 0))
-;;          (cols (array-dimension mat 1))
-;;          (result (matrix rows cols)))
-;;     (loop for i from 0 below rows
-;;        do (loop for j from 0 below cols
-;;              do (setf (aref result i j) (- (aref mat i j)))))
-;;     result))
 
-;; ;; 拓展的矩阵减法
-;; ;; Extended subtraction of matrix
-;; ;; When there is only one parameter passed, call function #'mminus instead of #'msub
-;; (defun m- (mat &rest mats)
-;;   (if (null mats)
-;;       (mminus mat)
-;;       (reduce #'msub (cons mat mats))))
+;;; 矩阵取反运算
+;;; Build a new matrix with each element negative of the corresponding one in mat
+(defun mminus (matrix)
+  (let* ((rows (matrix-rows matrix))
+         (cols (matrix-cols matrix))
+         (result (matrix rows cols :element-type (matrix-type matrix)))
+         (data (matrix-data result)))
+    (with-matrix (e matrix :end-row rows :end-col cols)
+      (setf (aref data row-index col-index) (- e)))
+    result))
+
+
+;;; 拓展的矩阵减法
+;;; Extended subtraction of matrix
+;;; When there is only one parameter passed, call function #'mminus instead of #'msub
+(defun m- (matrix &rest matrices)
+  (if (null matrices)
+      (mminus matrix)
+      (reduce #'msub (cons matrix matrices))))
 
 
 ;; ;; 二元矩阵乘法运算
