@@ -354,7 +354,7 @@
 ;; 化为列最简矩阵
 ;; Reduced col echelon form / col canonical form
 (defun col-canonical (mat)
-  (trans (rearrange (row-canonical (trans mat)))))
+  (trans (rearrangef (row-canonical (trans mat)))))
 
 
 ;; 化为标准型矩阵
