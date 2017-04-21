@@ -4,43 +4,56 @@
   (:use #:cl)
   (:export #:matrix
            #:m+
+           #:madd
            #:m-
+           #:msub
            #:m*
+           #:mmul
            #:diag
+           #:diagf
            #:diagp
+           #:diagonalf
+           #:diagonal-matrix
+           #:diagonal-matrix-p
            #:eye
            #:eyep
+           #:identity-matrix
+           #:identity-matrix-p
            #:copy-matrix
-           #:pr
-           #:print-matrix
            #:mexpt
            #:trans
-           #:row-multiplyf
-           #:row-addf
-           #:row-switchf
-           #:col-multiplyf
-           #:col-addf
-           #:col-switchf
-           #:rearrangef
+           #:mapeach
            #:row-echelon
            #:row-canonical
            #:col-canonical
            #:canonical
+           #:rank
            #:row-rank
            #:col-rank
-           #:rank
-           #:inversion
+           #:inv
            #:det
+           #:inversion
            #:submatrix
            #:minor
            #:cofactor
            #:signed-minor
            #:adj
-           #:inv
            #:tr
            #:dot
-           #:mapeach
+           #:dot-*
            #:msum
            #:norm
-           #:euclidean-distance))
-
+           #:euclidean-distance
+           #:permutation
+           #:gen-seq-vec
+           #:matrix-row-multiplyf
+           #:matrix-row-addf
+           #:matrix-row-switchf
+           #:matrix-col-multiplyf
+           #:matrix-col-addf
+           #:matrix-col-switchf
+           #:rearrangef
+           #:matrix-dimentions
+           #:with-i-j
+           #:with-matrix
+           #:*default-type*))
