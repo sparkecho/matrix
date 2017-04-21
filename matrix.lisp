@@ -421,8 +421,8 @@
       (perm vec 0 (length vec)))
     result))
 
-;; 生成一个从 1 到 n 的顺序数组
-;; Generate an ordered vector includes numbers that from 1 to n
+;; 生成一个从 0 到 n-1 的顺序数组
+;; Generate an ordered vector includes numbers that from 0 to n-1
 (defun gen-seq-vec (n)
   (make-array n :initial-contents (loop for i from 0 below n collect i)))
 
