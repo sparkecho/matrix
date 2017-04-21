@@ -2,7 +2,7 @@
 
 (asdf:defsystem #:matrix
   :description "This is a simple matrix manipulation library."
-  :author "zhz"
+  :author "sparkecho <echozhz@126.com>"
   :license "GPL"
   :serial t
   :components ((:file "package")
