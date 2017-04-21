@@ -350,16 +350,6 @@
       result)))
 
 
-;;; 对矩阵的每个元素进行操作
-;;; Do the given function on each element of mat
-(defun mapeach (function matrix)
-  (with-slots (rows cols type data) matrix
-    (let ((result (matrix rows cols :type type)))
-      (with-matrix (e result :end-row rows :end-col cols)
-        (setf e (funcall function (aref data i j))))
-      result)))
-
-
 ;;; 矩阵转置
 ;;; Matrix Transposion
 (defun trans (matrix)
@@ -367,6 +357,16 @@
     (let ((result (matrix cols rows :type type)))
       (with-matrix (e result)
         (setf e (aref data j i)))
+      result)))
+
+
+;;; 对矩阵的每个元素进行操作
+;;; Do the given function on each element of mat
+(defun mapeach (function matrix)
+  (with-slots (rows cols type data) matrix
+    (let ((result (matrix rows cols :type type)))
+      (with-matrix (e result :end-row rows :end-col cols)
+        (setf e (funcall function (aref data i j))))
       result)))
 
 
