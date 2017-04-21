@@ -57,26 +57,27 @@
        (format ,stream ,str ,num))))
 
 
+;;; Add `n' spaces at the head of `str'
+(defun add-spaces (str n)
+  (if (zerop n)
+      str
+      (add-spaces (concatenate 'string " " str) (1- n))))
+
+
 ;;; When 2 numbers are operated to form a new number,
 ;;; the strategy to choose the type of return value
 (defun type-strategy (type1 type2)
   (cond ((subtypep type1 type2) type2)
         ((subtypep type2 type1) type1)
-        (t (cond ((and (subtypep type1 'integer)
-                       (or (subtypep type2 'float)
-                           (subtypep type2 'double-float)
-                           (subtypep type2 'complex)))
-                  type2)
-                 ((and (or (subtypep type1 'float)
-                           (subtypep type1 'double-float)
-                           (subtypep type2 'complex))
-                       (subtypep type2 'integer))
-                  type1)
-                 ((and (or (subtypep type1 'float)
-                           (subtypep type1 'double-float))
-                       (subtypep type2 'complex))
-                  type2)
-                 ((and (subtypep type1 'complex)
-                       (or (subtypep type2 'float)
-                           (subtypep type2 'double-float)))
-                  type1)))))
+        (t (let ((type-vec (vector 'rational 'float 'double-float 'complex))
+                 (vec-len 4))
+             (dotimes (i vec-len)
+               (if (subtypep type1 (svref type-vec i))
+                   (setf (svref type-vec i) 1)
+                   (when (subtypep type2 (svref type-vec i))
+                     (setf (svref type-vec i) 2))))
+             (loop for i from (1- vec-len) downto 0
+                do (when (numberp (svref type-vec i))
+                     (return (if (= (svref type-vec i) 1)
+                                 type1
+                                 type2))))))))
