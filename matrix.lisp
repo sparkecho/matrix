@@ -565,11 +565,18 @@
     tmat))
 
 
+<<<<<<< HEAD
 ;;; 化为列最简矩阵
 ;;; Reduced col echelon form / col canonical form
 (defun col-canonical (matrix)
   (trans (rearrangef (row-canonical (trans matrix)))))
 
+=======
+;; 化为列最简矩阵
+;; Reduced col echelon form / col canonical form
+(defun col-canonical (mat)
+  (trans (rearrangef (row-canonical (trans mat)))))
+>>>>>>> c510fcd06617456a56f1349f0da3c4d709950357
 
 ;;; 化为标准型矩阵
 ;;; Transform the mat to canonical form
@@ -635,9 +642,14 @@
       (perm vec 0 (length vec)))
     result))
 
+<<<<<<< HEAD
 
 ;;; 生成一个从 0 到 n-1 的顺序数组
 ;;; Generate an ordered vector includes numbers that from 0 to n-1
+=======
+;; 生成一个从 0 到 n-1 的顺序数组
+;; Generate an ordered vector includes numbers that from 0 to n-1
+>>>>>>> c510fcd06617456a56f1349f0da3c4d709950357
 (defun gen-seq-vec (n)
   (make-array n :initial-contents (loop for i from 0 below n collect i)))
 
