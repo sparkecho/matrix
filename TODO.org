@@ -1,0 +1,4 @@
+TODO List
+
+* Use with-i-j rebuild functions
+* Use define-compiler-macro to optimize all code
