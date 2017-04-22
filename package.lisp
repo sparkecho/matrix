@@ -3,6 +3,11 @@
 (defpackage #:matrix
   (:use #:cl)
   (:export #:matrix
+           #:matrix-rows
+           #:matrix-cols
+           #:matrix-type
+           #:matrix-data
+           #:matrix-p
            #:m+
            #:madd
            #:m-
