@@ -8,6 +8,7 @@
            #:matrix-type
            #:matrix-data
            #:matrix-p
+           #:mref
            #:m+
            #:madd
            #:m-
