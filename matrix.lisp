@@ -24,10 +24,11 @@
 ;;; A iterator for 2 level loop with anaphor macro (i & j)
 ;;; (i,j) has value vary from (`start-row',`start-col') to
 ;;; (`end-row'-1,`end-col'-1)
-(defmacro with-i-j ((end-row end-col &key (start-row 0) (start-col 0))
+(defmacro with-i-j ((end-row end-col &key (start-row 0) (start-col 0)
+                             (row-index 'i) (col-index 'j))
                     &body body)
-  `(loop for i from ,start-row below ,end-row
-      do (loop for j from ,start-col below ,end-col
+  `(loop for ,row-index from ,start-row below ,end-row
+      do (loop for ,col-index from ,start-col below ,end-col
             do (progn ,@body))))
 
 
@@ -37,16 +38,16 @@
 ;;; (`end-row'-1,`end-col'-1) ]. `i' and `j' can be used
 ;;; to get current accessing index.
 (defmacro with-matrix ((elt matrix &key (start-row 0) (start-col 0)
-                            (end-row nil) (end-col nil))
+                            (end-row nil) (end-col nil) (row-index 'i) (col-index 'j))
                        &body body)
   (with-gensyms (max-row max-col data)
     `(let ((,max-row (or ,end-row (matrix-rows ,matrix)))
            (,max-col (or ,end-col (matrix-cols ,matrix)))
            (,data    (matrix-data ,matrix)))
-       (loop for i from ,start-row below ,max-row
-          do (loop for j from ,start-col below ,max-col
+       (loop for ,row-index from ,start-row below ,max-row
+          do (loop for ,col-index from ,start-col below ,max-col
                 do (progn
-                     ,@(subst `(aref ,data i j) `,elt `,body)))))))
+                     ,@(subst `(aref ,data ,row-index ,col-index) `,elt `,body)))))))
 
 
 ;;; Matrix pretty print function
