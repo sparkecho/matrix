@@ -60,5 +60,11 @@
            #:rearrangef
            #:matrix-dimentions
            #:with-i-j
+           #:i
+           #:j
            #:with-matrix
+           #:rows
+           #:cols
+           #:type
+           #:data
            #:*default-type*))
