@@ -1,4 +1,5 @@
 TODO List
 
+* Documentation is needed
 * Use define-compiler-macro to optimize all code
 * Use two-arg-+/- two-arg-* two-arg-/ to optimize matrices operations
