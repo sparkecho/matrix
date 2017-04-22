@@ -21,6 +21,16 @@
         (matrix-cols matrix)))
 
 
+;;; Access element of matrix.data at (row,col) position
+(defun mref (matrix i j)
+  (aref (matrix-data matrix) i j))
+
+
+;;; Make setf can be used for mref operation
+(defun (setf mref) (new-value matrix i j)
+  (setf (aref (matrix-data matrix) i j) new-value))
+
+
 ;;; A iterator for 2 level loop with anaphor macro (i & j)
 ;;; (i,j) has value vary from (`start-row',`start-col') to
 ;;; (`end-row'-1,`end-col'-1)
