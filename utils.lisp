@@ -1,7 +1,12 @@
 ;;;; utils.lisp
-;;;; Some useful tool code.
+;;;; Some useful tool code for matrix library.
 
-(in-package :matrix)
+(defpackage #:matrix/utils
+  (:use #:cl)
+  (:export #:with-gensyms
+           #:alias))
+
+(in-package #:matrix/utils)
 
 
 ;;; Convinent tool for binding multi symbols to (gensym)
@@ -22,22 +27,6 @@
      ,@body))
 
 
-;;; new-and-old is any number of pairs, a pair is
-;;; a two element list, with first as new value and
-;;; second element as old value
-;;; e.g. (multi-subst tree '(a b) '(c d))
-(defun multi-subst (tree &rest new-and-old)
-  (labels ((rec-subst (tree new-and-old)
-             (if (null new-and-old)
-                 tree
-                 (let ((lst (first new-and-old)))
-                   (rec-subst (subst (first lst)
-                                     (second lst)
-                                     tree)
-                              (cdr new-and-old))))))
-    (rec-subst tree new-and-old)))
-
-
 ;;; Set nickname for functions
 ;;; e.g. (alias eye identity-matrix)
 ;;; After the setting, you can use function eye the same
@@ -45,39 +34,3 @@
 (defmacro alias (dst-name src-name)
   `(setf (symbol-function ',dst-name)
          (symbol-function ',src-name)))
-
-
-;;; Make mincol `n' in format ~nD support variable
-;;; (format stream "~nD" n num)
-(defmacro format-mincol (stream n num)
-  (let ((str (gensym)))
-    `(let ((,str (concatenate
-                  'string
-                  "~" (write-to-string ,n) "D")))
-       (format ,stream ,str ,num))))
-
-
-;;; Add `n' spaces at the head of `str'
-(defun add-spaces (str n)
-  (if (zerop n)
-      str
-      (add-spaces (concatenate 'string " " str) (1- n))))
-
-
-;;; When 2 numbers are operated to form a new number,
-;;; the strategy to choose the type of return value
-(defun type-strategy (type1 type2)
-  (cond ((subtypep type1 type2) type2)
-        ((subtypep type2 type1) type1)
-        (t (let ((type-vec (vector 'rational 'float 'double-float 'complex))
-                 (vec-len 4))
-             (dotimes (i vec-len)
-               (if (subtypep type1 (svref type-vec i))
-                   (setf (svref type-vec i) 1)
-                   (when (subtypep type2 (svref type-vec i))
-                     (setf (svref type-vec i) 2))))
-             (loop for i from (1- vec-len) downto 0
-                do (when (numberp (svref type-vec i))
-                     (return (if (= (svref type-vec i) 1)
-                                 type1
-                                 type2))))))))
