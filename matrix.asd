@@ -6,6 +6,6 @@
   :license "GPL3.0"
   :class :package-inferred-system
   :defsystem-depends-on (:asdf-package-system)
-  :depends-on (:matrix/class
-               :matrix/array2d
-               :matrix/structure))
+  :depends-on (#:matrix/class
+               #:matrix/array2d
+               #:matrix/structure))
