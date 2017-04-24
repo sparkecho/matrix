@@ -231,6 +231,18 @@
                                             (matrix (length lst) (length (car lst)) :initial-contents lst))))))
 
 
+;;; Create sub matrix
+;;; Usage: #s(#.*mat1* 0 1)
+;;;        #s(#m((1 2 3) (4 5 6) (7 8 9)) (1 2) (0 1))
+;;; Used eval, otherwise the usage would be #s(#.*mat1* 0 1) when the first parameter is a variable
+(set-dispatch-macro-character #\# #\s
+                              #'(lambda (stream c n)
+                                  (declare (ignore c n))
+                                  (let ((lst (read stream nil (values) t)))
+                                    (submatrix (eval (first lst)) (second lst) (third lst)))))
+
+
+
 ;;; Set diagonal elements with elements in diagonal-contents
 (defun diagonal-from-contents (matrix diagonal-contents)
   (let ((data (matrix-data matrix)))
@@ -764,23 +776,56 @@
       acc)))
 
 
+(defgeneric submatrix (matrix row col)
+  (:documentation "Generate submatrix of the given matrix."))
+
+
+(defmethod submatrix (matrix (row list) (col list))
+  (with-slots (type data) matrix
+    (let* ((rmat (matrix (length row) (length col) :type type))
+           (rdata (matrix-data rmat)))
+      (loop for r in row
+         for i = 0 then (+ i 1)
+         do
+           (loop for c in col
+              for j = 0 then (+ j 1)
+              do
+                (setf (aref rdata i j) (aref data r c))))
+      rmat)))
+
 ;;; 生成除第 i 行和第 j 行元素的子矩阵
 ;;; Generate the submatrix of the matrix mat that exclude i-th row and j-th colum elements
-(defun submatrix (matrix i j)
+(defmethod submatrix (matrix (row integer) (col integer))
   (with-slots (rows cols type data) matrix
     (let* ((rmat (matrix (1- rows) (1- cols) :type type))
            (rdata (matrix-data rmat)))
       (dotimes (r (1- rows))
-        (if (< r i)
+        (if (< r row)
             (dotimes (c (1- cols))
-              (if (< c j)
+              (if (< c col)
                   (setf (aref rdata r c) (aref data r c))
                   (setf (aref rdata r c) (aref data r (1+ c)))))
             (dotimes (c (1- cols))
-              (if (< c j)
+              (if (< c col)
                   (setf (aref rdata r c) (aref data (1+ r) c))
                   (setf (aref rdata r c) (aref data (1+ r) (1+ c)))))))
       rmat)))
+
+;; (defun submatrix (matrix i j)
+;;   (with-slots (rows cols type data) matrix
+;;     (let* ((rmat (matrix (1- rows) (1- cols) :type type))
+;;            (rdata (matrix-data rmat)))
+;;       (dotimes (r (1- rows))
+;;         (if (< r i)
+;;             (dotimes (c (1- cols))
+;;               (if (< c j)
+;;                   (setf (aref rdata r c) (aref data r c))
+;;                   (setf (aref rdata r c) (aref data r (1+ c)))))
+;;             (dotimes (c (1- cols))
+;;               (if (< c j)
+;;                   (setf (aref rdata r c) (aref data (1+ r) c))
+;;                   (setf (aref rdata r c) (aref data (1+ r) (1+ c)))))))
+;;       rmat)))
 
 
 ;;; 余子式
