@@ -15,6 +15,9 @@
            #:print-matrix
            #:mexpt
            #:trans
+           #:concate
+           #:concate-horizontal
+           #:concate-vertical
            #:row-multiplyf
            #:row-addf
            #:row-switchf
@@ -626,3 +629,54 @@
                (= (array-dimension vec1 1) (array-dimension vec2 1))))
   (let ((vec (m- vec1 vec2)))
     (norm vec)))
+
+
+;; 按照给定方向连接矩阵
+;; Concatenate matrices as given direction.
+(defun concate (direction &rest matrices)
+  (let ((direction (if (symbolp direction)
+                       (symbol-name direction)
+                       direction)))
+    (cond
+      ((member direction '("-" "H" "h" "horizontal") :test #'string=)
+       (reduce #'concate-horizontal matrices))
+      ((member direction '("|" "V" "v" "vertical") :test #'string=)
+       (reduce #'concate-vertical matrices)))))
+
+
+;; 水平方向连接两个矩阵
+;; Concatenate two matrices horizontally.
+(defun concate-horizontal (mat1 mat2)
+  (let ((rows1 (array-dimension mat1 0))
+        (cols1 (array-dimension mat1 1))
+        (rows2 (array-dimension mat2 0))
+        (cols2 (array-dimension mat2 1)))
+    (assert (= rows1 rows2))
+    (let ((mat (matrix rows1 (+ cols1 cols2))))
+      (dotimes (i rows1)
+        (dotimes (j cols1)
+          (setf (aref mat i j) (aref mat1 i j))))
+      (dotimes (i rows2)
+        (loop for j fixnum from 0 below cols2
+           for col = cols1 then (+ col 1)
+           do (setf (aref mat i col) (aref mat2 i j))))
+      mat)))
+
+
+;; 竖直方向连接两个矩阵
+;; Concatenate two matrices vertically.
+(defun concate-vertical (mat1 mat2)
+  (let ((rows1 (array-dimension mat1 0))
+        (cols1 (array-dimension mat1 1))
+        (rows2 (array-dimension mat2 0))
+        (cols2 (array-dimension mat2 1)))
+    (assert (= cols1 cols2))
+    (let ((mat (matrix (+ rows1 rows2) cols1)))
+      (dotimes (i rows1)
+        (dotimes (j cols1)
+          (setf (aref mat i j) (aref mat1 i j))))
+      (dotimes (j cols2)
+        (loop for i fixnum from 0 below rows2
+           for row = rows1 then (+ row 1)
+           do (setf (aref mat row j) (aref mat2 i j))))
+      mat)))
