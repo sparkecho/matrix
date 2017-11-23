@@ -1,6 +1,6 @@
 TODO List
 
 * Documentation is needed
-* Add type to opeimize
+* Add type to optimize
 * Use define-compiler-macro to optimize all code
 * Use two-arg-+/- two-arg-* two-arg-/ to optimize matrices operations
